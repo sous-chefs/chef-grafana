@@ -2,7 +2,9 @@
 
 This file is used to list changes made in each version of grafana.
 
-## Unreleased
+## Unreleased 
+
+- Add Okta auth support - [@mbaitelman](https://github.com/mbaitelman)
 
 ## 9.6.0 - *2021-02-17*
 
