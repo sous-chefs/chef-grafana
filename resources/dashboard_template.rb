@@ -1,3 +1,5 @@
+unified_mode true
+
 property :host,               String,   default: 'localhost'
 property :port,               Integer,  default: 3000
 property :url_path_prefix,    String
@@ -11,8 +13,6 @@ property :template_vars,      Hash,    default: {}
 property :template_cookbook,  String
 property :organization,       String
 property :folder,             String
-
-default_action :create
 
 action :create do
   templated_dashboard(:create)
