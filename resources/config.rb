@@ -20,20 +20,22 @@
 #
 # Configures the installed grafana instance
 
+unified_mode true
+
+use 'partial/_config_file'
+
 property  :instance_name,       String,                   name_property: true
 property  :env_directory,       String,                   default: '/etc/default'
-property  :owner,               String,                   default: 'grafana'
-property  :group,               String,                   default: 'grafana'
 property  :restart_on_upgrade,  [true, false],            default: false
 property  :conf_directory,      String,                   default: '/etc/grafana'
 property  :app_mode,            String,                   default: 'production', equal_to: %w(production development)
-property  :cookbook,            String,                   default: 'grafana'
+property  :extra_options,       Hash
+
+action_class do
+  include GrafanaCookbook::ConfigHelper
+end
 
 action :install do
-  user new_resource.owner
-
-  group new_resource.group
-
   directory new_resource.conf_directory do
     owner new_resource.owner
     group new_resource.group
@@ -48,7 +50,8 @@ action :install do
   end
 
   template ::File.join(new_resource.env_directory, 'grafana-server') do
-    source 'grafana-env.erb'
+    source new_resource.source_env
+    cookbook new_resource.cookbook
     variables(
       grafana_user: new_resource.owner,
       grafana_group: new_resource.group,
@@ -57,16 +60,12 @@ action :install do
       pid_dir: '/var/run/grafana',
       restart_on_upgrade: new_resource.restart_on_upgrade.to_s
     )
-    cookbook new_resource.cookbook
     mode '0644'
   end
 
-  # Node run state is not like attributes and you need to declare types as
-  # you walk down the tree
-  node.run_state['sous-chefs'] ||= {}
-  node.run_state['sous-chefs'][new_resource.instance_name] ||= {}
-  node.run_state['sous-chefs'][new_resource.instance_name]['config'] ||= {}
+  resource_properties.each do |rp|
+    next if nil_or_empty?(new_resource.send(rp))
 
-  node.run_state['sous-chefs'][new_resource.instance_name]['config']['instance_name'] = new_resource.instance_name unless new_resource.instance_name.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['config']['app_mode'] = new_resource.app_mode unless new_resource.app_mode.nil?
+    run_state_config_set(rp.to_s, new_resource.send(rp))
+  end
 end

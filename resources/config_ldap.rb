@@ -19,6 +19,10 @@
 # Configures the installed grafana instance's ldap settings
 # See https://raw.githubusercontent.com/grafana/grafana/master/conf/ldap.toml
 
+unified_mode true
+
+use 'partial/_config_file'
+
 property  :instance_name,                 String, name_property: true
 property  :log_filters,                   String
 property  :servers_attributes_name,       String, default: 'givenName'
@@ -27,21 +31,17 @@ property  :servers_attributes_username,   String, default: 'cn'
 property  :servers_attributes_member_of,  String, default: 'memberOf'
 property  :servers_attributes_email,      String, default: 'email'
 
-action :install do
-  node.run_state['sous-chefs'] ||= {}
-  node.run_state['sous-chefs'][new_resource.instance_name] ||= {}
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap'] ||= {}
+action_class do
+  include GrafanaCookbook::ConfigHelper
+end
 
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['log_filters'] ||= '' unless new_resource.log_filters.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['log_filters'] << new_resource.log_filters.to_s unless new_resource.log_filters.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_name'] ||= '' unless new_resource.servers_attributes_name.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_name'] << new_resource.servers_attributes_name.to_s unless new_resource.servers_attributes_name.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_surname'] ||= '' unless new_resource.servers_attributes_surname.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_surname'] << new_resource.servers_attributes_surname.to_s unless new_resource.servers_attributes_surname.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_username'] ||= '' unless new_resource.servers_attributes_username.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_username'] << new_resource.servers_attributes_username.to_s unless new_resource.servers_attributes_username.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_member_of'] ||= '' unless new_resource.servers_attributes_member_of.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_member_of'] << new_resource.servers_attributes_member_of.to_s unless new_resource.servers_attributes_member_of.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_email'] ||= '' unless new_resource.servers_attributes_email.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['ldap']['servers_attributes_email'] << new_resource.servers_attributes_email.to_s unless new_resource.servers_attributes_email.nil?
+action :install do
+  resource_properties.each do |rp|
+    next if nil_or_empty?(new_resource.send(rp))
+
+    run_state_config_set(rp.to_s, new_resource.send(rp), new_resource.instance_name, 'ldap')
+  end
+
+  # Log filters go in the main config file
+  run_state_config_set(rp.to_s, new_resource.log_filters, new_resource.instance_name, 'config', 'log') unless nil_or_empty?(new_resource.log_filters)
 end

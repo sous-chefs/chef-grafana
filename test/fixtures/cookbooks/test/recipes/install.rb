@@ -1,6 +1,9 @@
 grafana_install 'grafana'
 
-grafana_config 'Grafana'
+grafana_config 'Grafana' do
+  # In test we turn of sensitive so we can get better logs
+  sensitive false
+end
 grafana_config_alerting 'Grafana'
 grafana_config_auth 'Grafana'
 grafana_config_dashboards 'Grafana'
@@ -29,12 +32,11 @@ grafana_config_external_image_storage_s3 'Grafana' do
   region 'us-east-1'
 end
 
-grafana_config_writer 'Grafana' do
-  # In test we turn of sensitive so we can get better logs
-  sensitive false
-end
-
 # Tests are failing as the server has not fully become available when tests run
 chef_sleep 'Sleep so inspec tests pass' do
   seconds 25
+end
+
+grafana_service 'grafana' do
+  action %i(enable start)
 end

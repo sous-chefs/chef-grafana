@@ -18,11 +18,21 @@
 #
 # Configures the installed grafana instance
 
+unified_mode true
+
+use 'partial/_config_file'
+
 property  :instance_name,   String,         name_property: true
 property  :logging,         [true, false],  default: false
 
+action_class do
+  include GrafanaCookbook::ConfigHelper
+end
+
 action :install do
-  node.run_state['sous-chefs'][new_resource.instance_name]['config']['dataproxy'] ||= {}
-  node.run_state['sous-chefs'][new_resource.instance_name]['config']['dataproxy']['logging'] ||= '' unless new_resource.logging.nil?
-  node.run_state['sous-chefs'][new_resource.instance_name]['config']['dataproxy']['logging'] << new_resource.logging.to_s unless new_resource.logging.nil?
+  resource_properties.each do |rp|
+    next if nil_or_empty?(new_resource.send(rp))
+
+    run_state_config_set(rp.to_s, new_resource.send(rp))
+  end
 end

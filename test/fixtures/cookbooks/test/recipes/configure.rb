@@ -19,7 +19,10 @@ grafana_config_dashboards 'Grafana' do
   min_refresh_interval '3s'
 end
 
-grafana_config_writer 'Grafana'
+grafana_service 'grafana' do
+  action %i(enable start)
+  delay_start false
+end
 
 # Needed for some inspec tests
 package 'curl'
