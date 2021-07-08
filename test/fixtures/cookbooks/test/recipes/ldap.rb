@@ -1,6 +1,9 @@
 grafana_install 'grafana'
 
-grafana_config 'Grafana'
+grafana_config 'Grafana' do
+  # In test we turn of sensitive so we can get better logs
+  sensitive false
+end
 
 grafana_config_auth 'Grafana' do
   ldap_enabled true
@@ -32,11 +35,6 @@ end
 grafana_config_ldap_group_mappings 'Grafana' do
   group_dn  'cn=readers,dc=grafana,dc=org'
   org_role  'Viewer'
-end
-
-grafana_config_writer 'Grafana' do
-  # In test we turn of sensitive so we can get better logs
-  sensitive false
 end
 
 # Tests are failing as the server has not fully become available when tests run

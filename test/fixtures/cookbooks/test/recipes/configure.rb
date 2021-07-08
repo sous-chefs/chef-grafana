@@ -19,8 +19,6 @@ grafana_config_dashboards 'Grafana' do
   min_refresh_interval '3s'
 end
 
-grafana_config_writer 'Grafana'
-
 # Needed for some inspec tests
 package 'curl'
 
