@@ -19,6 +19,11 @@ grafana_config_dashboards 'Grafana' do
   min_refresh_interval '3s'
 end
 
+grafana_service 'grafana' do
+  action %i(enable start)
+  delay_start false
+end
+
 # Needed for some inspec tests
 package 'curl'
 
@@ -190,8 +195,4 @@ end
 
 grafana_datasources_backup 'Backup Datasources to File' do
   auth_proxy_header auth_header
-end
-
-grafana_service 'grafana' do
-  action %i(enable start)
 end
