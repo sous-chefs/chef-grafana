@@ -18,6 +18,10 @@
 #
 # Configures the installed grafana instance
 
+unified_mode true
+
+use 'partial/_config_file'
+
 property  :instance_name,       String,         name_property: true
 property  :mode,                String,         default: 'console file'
 property  :level,               String,         default: 'info'

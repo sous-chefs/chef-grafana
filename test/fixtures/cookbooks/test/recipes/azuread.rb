@@ -26,3 +26,7 @@ end
 chef_sleep 'Sleep so inspec tests pass' do
   seconds 25
 end
+
+grafana_service 'grafana' do
+  action %i(enable start)
+end

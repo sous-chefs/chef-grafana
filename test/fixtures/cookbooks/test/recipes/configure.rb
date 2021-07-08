@@ -193,3 +193,7 @@ end
 grafana_datasources_backup 'Backup Datasources to File' do
   auth_proxy_header auth_header
 end
+
+grafana_service 'grafana' do
+  action %i(enable start)
+end
